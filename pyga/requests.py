@@ -5,8 +5,8 @@ import calendar
 from math import floor
 from pyga.entities import Campaign, CustomVariable, Event, Item, Page, Session, SocialInteraction, Transaction, Visitor
 import pyga.utils as utils
-import urllib
-import urllib2
+from urllib import request as requ
+from urllib.parse import urlencode
 
 __author__ = "Arun KR (kra3) <the1.arun@gmail.com>"
 __license__ = "Simplified BSD"
@@ -43,7 +43,7 @@ class GIFRequest(object):
 
     def build_http_request(self):
         params = self.build_parameters()
-        query_string = urllib.urlencode(params.get_parameters())
+        query_string = urlencode(params.get_parameters())
         query_string = query_string.replace('+', '%20')
 
         # Mimic Javascript's encodeURIComponent() encoding for the query
@@ -73,7 +73,7 @@ class GIFRequest(object):
         logger.debug(url)
         if post:
             logger.debug(post)
-        return urllib2.Request(url, post, headers)
+        return requ.Request(url, post, headers)
 
     def build_parameters(self):
         '''Marker implementation'''
@@ -85,7 +85,7 @@ class GIFRequest(object):
 
         #  Do not actually send the request if endpoint host is set to null
         if self.config.endpoint:
-            response = urllib2.urlopen(
+            response = requ.urlopen(
                 request, timeout=self.config.request_timeout)
 
         return response
@@ -154,14 +154,6 @@ class Request(GIFRequest):
         '''
         params.utmip = self.visitor.ip_address
         params.aip = self.tracker.config.anonimize_ip_address and 1 or None
-
-        # Add override User-Agent parameter (&ua) and override IP address
-        # parameter (&uip). Note that the override IP address parameter is
-        # always anonymized, as if &aip were present (see
-        # https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#uip)
-        params.ua = self.visitor.user_agent
-        params.uip = utils.anonymize_ip(self.visitor.ip_address)
-
         if params.aip:
             # If anonimization of ip enabled? then!
             params.utmip = utils.anonymize_ip(params.utmip)
@@ -241,7 +233,7 @@ class Request(GIFRequest):
                 'utmcct': campaign.content,
             }
 
-            for k, v in param_map.iteritems():
+            for k, v in param_map.items():
                 if v:
                     # Only spaces and pluses get escaped in gaforflash and ga.js, so we do the same
                     params._utmz = '%s%s=%s%s' % (params._utmz, k,
@@ -1033,7 +1025,7 @@ class X10(object):
 
     def render_url_string(self):
         result = ''
-        for project_id, project in self.project_data.iteritems():
+        for project_id, project in self.project_data.items():
             result = '%s%s%s' % (
                 result, project_id, self.__render_project(project))
 

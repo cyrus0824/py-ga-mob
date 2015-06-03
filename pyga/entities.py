@@ -2,8 +2,8 @@
 
 from datetime import datetime
 from operator import itemgetter
-from urlparse import urlparse
-from urllib import unquote_plus
+from urllib import parse as urlparse
+from urllib.parse import unquote_plus
 from pyga import utils
 from pyga import exceptions
 
@@ -181,7 +181,7 @@ class CustomVariable(object):
 class Event(object):
     '''
     Represents an Event
-    https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide
+    http://code.google.com/apis/analytics/docs/tracking/eventTrackerOverview.html
 
     Properties:
     category -- The general event category
@@ -416,7 +416,7 @@ class Visitor(object):
 
     def __setattr__(self, name, value):
         if name == 'unique_id':
-            if value and value < 0 or value > 0x7fffffff:
+            if value and (value < 0 or value > 0x7fffffff):
                 raise ValueError('Visitor unique ID has to be a 32-bit integer between 0 and 0x7fffffff')
         object.__setattr__(self, name, value)
 
@@ -461,7 +461,7 @@ class Visitor(object):
             for key in ('HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'):
                 if key in meta and not ip:
                     ips = meta.get(key, '').split(',')
-                    ip = ips[-1].strip()
+                    ip = ips[len(ips) - 1].strip()
                     if not utils.is_valid_ip(ip):
                         ip = ''
                     if utils.is_private_ip(ip):
